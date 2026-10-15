@@ -3,22 +3,22 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ry Apps</title>
+    <title>RyApps</title>
     <meta name="description" content="RyHome and RyMessage: small Windows apps for your smart home and your texts, built by Ryan Polasky." />
-    <meta property="og:title" content="Ry Apps" />
+    <meta property="og:title" content="RyApps" />
     <meta property="og:description" content="RyHome and RyMessage: small Windows apps for your smart home and your texts." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://apps.ryanpolasky.com/" />
     <meta property="og:image" content="https://apps.ryanpolasky.com/shots/ryhome-home.webp" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="theme-color" content="#0d0e12" />
+    <meta name="theme-color" content="#f9f9f6" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
     <header class="hero">
       <nav class="nav">
-        <a class="brand" href="#top"><img src="/favicon.svg" alt="" width="28" height="28" />Ry Apps</a>
+        <a class="brand" href="#top" aria-label="RyApps home"><span class="brand-r">R</span>yApps<span class="brand-dot" aria-hidden="true">.</span></a>
         <div class="nav-links">
           <a href="#ryhome">RyHome</a>
           <a href="#rymessage">RyMessage</a>
@@ -26,26 +26,27 @@
         </div>
       </nav>
       <div class="hero-copy" id="top">
-        <p class="eyebrow">Free, open source, Windows</p>
-        <h1>Little apps that make my PC play nice with everything else.</h1>
-        <p class="lede">I built these on my own time because I wanted my smart home and my texts on the computer I actually sit at. They're free, and the code is all on GitHub.</p>
+        <h1>At home<br /><span>on Windows.</span></h1>
+        <p class="lede">Two free, open-source apps by Ryan Polasky.</p>
       </div>
       <div class="app-cards">
         <a class="app-card home" href="#ryhome">
-          <img src="/ryhome.svg" alt="" width="56" height="56" />
-          <div>
-            <h2>RyHome</h2>
-            <p>Control your Matter lights, plugs, locks, and sensors from Windows.</p>
+          <div class="card-heading">
+            <img src="/ryhome.svg" alt="" width="44" height="44" />
+            <div><h2>RyHome</h2><p>A little closer to home.</p></div>
+            <span class="arrow" aria-hidden="true">&nearr;</span>
           </div>
-          <span class="arrow" aria-hidden="true">&rarr;</span>
+          <div class="card-preview"><img src="/shots/ryhome-home.webp" alt="Preview of RyHome's room controls" width="1280" height="800" fetchpriority="high" /></div>
+          <span class="card-caption">Matter devices. No Mac required.</span>
         </a>
         <a class="app-card message" href="#rymessage">
-          <img src="/rymessage.svg" alt="" width="56" height="56" />
-          <div>
-            <h2>RyMessage</h2>
-            <p>Read and send your iMessage and SMS texts on Windows, through your Mac.</p>
+          <div class="card-heading">
+            <img src="/rymessage.svg" alt="" width="44" height="44" />
+            <div><h2>RyMessage</h2><p>Keep the conversation going.</p></div>
+            <span class="arrow" aria-hidden="true">&nearr;</span>
           </div>
-          <span class="arrow" aria-hidden="true">&rarr;</span>
+          <div class="card-preview"><img src="/shots/rymessage-chat.webp" alt="Preview of a RyMessage conversation" width="1280" height="800" /></div>
+          <span class="card-caption">iMessage and SMS. Through your Mac.</span>
         </a>
       </div>
     </header>
@@ -56,10 +57,10 @@
           <img src="/ryhome.svg" alt="" width="72" height="72" />
           <div>
             <h2>RyHome</h2>
-            <p class="tagline">Your Matter smart home, on your PC.</p>
+            <p class="tagline">Home is a click away.</p>
           </div>
         </div>
-        <p class="summary">RyHome runs its own Matter controller right inside the app, so it talks to your devices directly over your network. No hub, no Mac, no cloud account. It works alongside Apple Home, Google Home, or Alexa instead of replacing them.</p>
+        <p class="summary">Set the mood without leaving your desk. RyHome controls your Matter devices directly over your network, alongside Apple Home, Google Home, or Alexa. No Mac or separate controller hub required.</p>
         <div class="actions">
           <a class="button primary" href="https://github.com/ryanpolasky/RyHome/releases/latest" rel="noopener">Download for Windows</a>
           <a class="button" href="https://github.com/ryanpolasky/RyHome" rel="noopener">View on GitHub</a>
@@ -79,12 +80,12 @@
             <strong>Your PC</strong>
             <span>RyHome with its built-in Matter engine</span>
           </div>
-          <div class="link"><span>your Wi-Fi or Ethernet</span></div>
+          <div class="link"><svg viewBox="0 0 64 16" fill="none" aria-hidden="true"><path d="M2 8h58m-6-6 6 6-6 6" /></svg><span>Wi-Fi or Ethernet</span></div>
           <div class="node">
             <strong>Matter devices</strong>
             <span>Lights, plugs, locks, blinds, fans, thermostats, sensors</span>
           </div>
-          <div class="link dashed"><span>also paired with</span></div>
+          <div class="link dashed"><svg viewBox="0 0 64 16" fill="none" aria-hidden="true"><path d="M2 8h58m-6-6 6 6-6 6" /></svg><span>Also paired with</span></div>
           <div class="node muted">
             <strong>Your other home apps</strong>
             <span>Apple Home, Google Home, Alexa keep working</span>
@@ -112,6 +113,8 @@
           <h4>Before you install</h4>
           <ul>
             <li>Your PC needs to be on the same network as your devices.</li>
+            <li>Cameras, doorbells, Apple TV, and HomePod aren't supported.</li>
+            <li>Light controls are hardware-tested. Other device types have implemented controls or readings but haven't been tested on real hardware yet.</li>
             <li>Add a device with the pairing code from the app it's already set up in. In Apple Home that's the accessory's settings, then Turn On Pairing Mode. RyHome can't do Bluetooth setup, so brand new devices need setting up there first.</li>
             <li>Windows Firewall asks about Node.js the first time. That's RyHome's engine, so allow it on private networks.</li>
             <li>It isn't code signed yet, so SmartScreen may warn on first run. Click More info, then Run anyway.</li>
@@ -124,10 +127,10 @@
           <img src="/rymessage.svg" alt="" width="72" height="72" />
           <div>
             <h2>RyMessage</h2>
-            <p class="tagline">Your texts, on Windows.</p>
+            <p class="tagline">Less reaching for your phone.</p>
           </div>
         </div>
-        <p class="summary">Your Mac stays the real iMessage device. A small server on it hands your conversations to the Windows app, which reads and sends them like a native messaging app, with notifications that pop up even when the window is closed.</p>
+        <p class="summary">Read, reply, and get back to what you were doing. RyMessage brings your iMessage and SMS conversations to Windows through a small companion server on your Mac.</p>
         <div class="actions">
           <a class="button primary" href="https://github.com/ryanpolasky/RyMessage/releases/latest" rel="noopener">Download for Windows</a>
           <a class="button" href="https://github.com/ryanpolasky/RyMessage" rel="noopener">View on GitHub</a>
@@ -147,12 +150,12 @@
             <strong>Your PC</strong>
             <span>The RyMessage app</span>
           </div>
-          <div class="link"><span>home network or Tailscale</span></div>
+          <div class="link"><svg viewBox="0 0 64 16" fill="none" aria-hidden="true"><path d="M2 8h58m-6-6 6 6-6 6" /></svg><span>Network or Tailscale</span></div>
           <div class="node">
             <strong>Your Mac</strong>
             <span>The RyMessage server, running at login</span>
           </div>
-          <div class="link"><span>reads and sends through</span></div>
+          <div class="link"><svg viewBox="0 0 64 16" fill="none" aria-hidden="true"><path d="M2 8h58m-6-6 6 6-6 6" /></svg><span>Reads and sends</span></div>
           <div class="node muted">
             <strong>Messages</strong>
             <span>Your iMessage and SMS conversations</span>

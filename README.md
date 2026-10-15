@@ -1,4 +1,4 @@
-# Ry Apps
+# RyApps
 
 The site for my Windows apps, [RyHome](https://github.com/ryanpolasky/RyHome) and [RyMessage](https://github.com/ryanpolasky/RyMessage). Live at [apps.ryanpolasky.com](https://apps.ryanpolasky.com).
 
@@ -20,6 +20,8 @@ npm run deploy
 That builds to `dist/` and runs `wrangler deploy`, which also attaches the `apps.ryanpolasky.com` custom domain from `wrangler.jsonc`. Run `npx wrangler login` once first.
 
 Screenshots in `public/shots/` come from each app's demo mode, so they never show real data.
+
+RyHome's screenshots exclude unsupported camera, doorbell, Apple TV, HomePod, and robot vacuum placeholders. Its demo sensors represent standalone Matter sensors, not HomePod readings. The site lists support limits and distinguishes hardware-tested lights from other implemented device types.
 
 ## Disclaimer
 
