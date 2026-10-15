@@ -121,7 +121,7 @@
             "url": "https://apps.ryanpolasky.com/#rymessage",
             "downloadUrl": "https://github.com/ryanpolasky/RyMessage/releases/latest",
             "codeRepository": "https://github.com/ryanpolasky/RyMessage",
-            "description": "A native Windows client for iMessage and SMS backed by a lightweight companion server on your Mac. Includes floating desktop notifications, reactions, threaded replies, live message edits and unsends, media attachments, and custom notification sounds.",
+            "description": "A native Windows client for iMessage and SMS backed by a lightweight companion server on your Mac. Includes floating desktop notifications, incoming reactions, replies, edits, and unsends, media attachments, and custom notification sounds.",
             "image": "https://apps.ryanpolasky.com/shots/rymessage-chat.webp",
             "screenshot": "https://apps.ryanpolasky.com/shots/rymessage-chat.webp",
             "applicationCategory": "CommunicationApplication",
@@ -295,7 +295,7 @@
 
         <ul class="features grid">
           <li><strong>Notifications that float</strong> New texts slide in at the top of your screen, even with the window closed to the tray.</li>
-          <li><strong>The good stuff</strong> Reactions, threaded replies, live edits and unsends, jumbo emoji, and :shortcode: autocomplete.</li>
+          <li><strong>The good stuff</strong> Incoming tapbacks, threaded replies, live edits and unsends all render properly, plus jumbo emoji and :shortcode: autocomplete.</li>
           <li><strong>Photos, videos, files</strong> Drag them in, paste them, or pick them, and voice and video messages play inline.</li>
           <li><strong>Your own sounds</strong> Upload a notification sound, then trim it and fade it right in the app.</li>
         </ul>
@@ -305,6 +305,7 @@
           <ul>
             <li>You need a Mac that stays on and signed in to Messages. Run the server's install script there and it prints a pairing code for the Windows app.</li>
             <li>The PC and Mac need to reach each other. A private network like Tailscale works great.</li>
+            <li>Incoming tapbacks, threaded replies, edits, and unsends show up, but sending tapbacks or inline replies and editing or unsending your own texts from Windows aren't supported yet (Messages.app doesn't expose those cleanly).</li>
             <li>It isn't code signed yet, so SmartScreen may warn on first run. Click More info, then Run anyway.</li>
           </ul>
         </div>
