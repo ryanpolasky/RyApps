@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ry Apps</title>
+    <meta name="description" content="RyHome and RyMessage: small Windows apps for your smart home and your texts, built by Ryan Polasky." />
+    <meta property="og:title" content="Ry Apps" />
+    <meta property="og:description" content="RyHome and RyMessage: small Windows apps for your smart home and your texts." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://apps.ryanpolasky.com/" />
+    <meta property="og:image" content="https://apps.ryanpolasky.com/shots/ryhome-home.webp" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#0d0e12" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <nav class="nav">
+        <a class="brand" href="#top"><img src="/favicon.svg" alt="" width="28" height="28" />Ry Apps</a>
+        <div class="nav-links">
+          <a href="#ryhome">RyHome</a>
+          <a href="#rymessage">RyMessage</a>
+          <a href="https://github.com/ryanpolasky" rel="noopener">GitHub</a>
+        </div>
+      </nav>
+      <div class="hero-copy" id="top">
+        <p class="eyebrow">Free, open source, Windows</p>
+        <h1>Little apps that make my PC play nice with everything else.</h1>
+        <p class="lede">I built these on my own time because I wanted my smart home and my texts on the computer I actually sit at. They're free, and the code is all on GitHub.</p>
+      </div>
+      <div class="app-cards">
+        <a class="app-card home" href="#ryhome">
+          <img src="/ryhome.svg" alt="" width="56" height="56" />
+          <div>
+            <h2>RyHome</h2>
+            <p>Control your Matter lights, plugs, locks, and sensors from Windows.</p>
+          </div>
+          <span class="arrow" aria-hidden="true">&rarr;</span>
+        </a>
+        <a class="app-card message" href="#rymessage">
+          <img src="/rymessage.svg" alt="" width="56" height="56" />
+          <div>
+            <h2>RyMessage</h2>
+            <p>Read and send your iMessage and SMS texts on Windows, through your Mac.</p>
+          </div>
+          <span class="arrow" aria-hidden="true">&rarr;</span>
+        </a>
+      </div>
+    </header>
+
+    <main>
+      <section class="app home" id="ryhome">
+        <div class="app-head">
+          <img src="/ryhome.svg" alt="" width="72" height="72" />
+          <div>
+            <h2>RyHome</h2>
+            <p class="tagline">Your Matter smart home, on your PC.</p>
+          </div>
+        </div>
+        <p class="summary">RyHome runs its own Matter controller right inside the app, so it talks to your devices directly over your network. No hub, no Mac, no cloud account. It works alongside Apple Home, Google Home, or Alexa instead of replacing them.</p>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/ryanpolasky/RyHome/releases/latest" rel="noopener">Download for Windows</a>
+          <a class="button" href="https://github.com/ryanpolasky/RyHome" rel="noopener">View on GitHub</a>
+        </div>
+
+        <figure class="window">
+          <div class="titlebar">
+            <span><img src="/ryhome.svg" alt="" width="14" height="14" />RyHome</span>
+            <span class="caption" aria-hidden="true"><i class="min"></i><i class="max"></i><i class="close"></i></span>
+          </div>
+          <img src="/shots/ryhome-home.webp" alt="RyHome's home screen with rooms of lights, plugs, a lock, sensors, and scenes" width="1280" height="800" loading="lazy" />
+        </figure>
+
+        <h3>How it works</h3>
+        <div class="flow">
+          <div class="node">
+            <strong>Your PC</strong>
+            <span>RyHome with its built-in Matter engine</span>
+          </div>
+          <div class="link"><span>your Wi-Fi or Ethernet</span></div>
+          <div class="node">
+            <strong>Matter devices</strong>
+            <span>Lights, plugs, locks, blinds, fans, thermostats, sensors</span>
+          </div>
+          <div class="link dashed"><span>also paired with</span></div>
+          <div class="node muted">
+            <strong>Your other home apps</strong>
+            <span>Apple Home, Google Home, Alexa keep working</span>
+          </div>
+        </div>
+
+        <div class="split">
+          <figure class="window small">
+            <div class="titlebar">
+              <span><img src="/ryhome.svg" alt="" width="14" height="14" />RyHome</span>
+              <span class="caption" aria-hidden="true"><i class="min"></i><i class="max"></i><i class="close"></i></span>
+            </div>
+            <img src="/shots/ryhome-color.webp" alt="A light group's controls with a brightness slider, color wheel, and saved colors" width="1280" height="800" loading="lazy" />
+          </figure>
+          <ul class="features">
+            <li><strong>Lights, properly</strong> Brightness, a color wheel, white temperature, and swatches you can overwrite with your own colors.</li>
+            <li><strong>Groups and scenes</strong> Turn several bulbs into one tile, and save scenes from how your lights look right now.</li>
+            <li><strong>More than lights</strong> Plugs, switches, locks, blinds, fans, thermostats, and temperature, humidity, motion, contact, and leak sensors.</li>
+            <li><strong>Lives in the tray</strong> All Lights Off and your scenes are a right-click away, and it can start with Windows.</li>
+            <li><strong>Backups</strong> Export your pairings, rooms, groups, and scenes to one file and restore them on a new PC.</li>
+          </ul>
+        </div>
+
+        <div class="notes">
+          <h4>Before you install</h4>
+          <ul>
+            <li>Your PC needs to be on the same network as your devices.</li>
+            <li>Add a device with the pairing code from the app it's already set up in. In Apple Home that's the accessory's settings, then Turn On Pairing Mode. RyHome can't do Bluetooth setup, so brand new devices need setting up there first.</li>
+            <li>Windows Firewall asks about Node.js the first time. That's RyHome's engine, so allow it on private networks.</li>
+            <li>It isn't code signed yet, so SmartScreen may warn on first run. Click More info, then Run anyway.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="app message" id="rymessage">
+        <div class="app-head">
+          <img src="/rymessage.svg" alt="" width="72" height="72" />
+          <div>
+            <h2>RyMessage</h2>
+            <p class="tagline">Your texts, on Windows.</p>
+          </div>
+        </div>
+        <p class="summary">Your Mac stays the real iMessage device. A small server on it hands your conversations to the Windows app, which reads and sends them like a native messaging app, with notifications that pop up even when the window is closed.</p>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/ryanpolasky/RyMessage/releases/latest" rel="noopener">Download for Windows</a>
+          <a class="button" href="https://github.com/ryanpolasky/RyMessage" rel="noopener">View on GitHub</a>
+        </div>
+
+        <figure class="window">
+          <div class="titlebar">
+            <span><img src="/rymessage.svg" alt="" width="14" height="14" />RyMessage</span>
+            <span class="caption" aria-hidden="true"><i class="min"></i><i class="max"></i><i class="close"></i></span>
+          </div>
+          <img src="/shots/rymessage-chat.webp" alt="RyMessage showing a group conversation with reactions and replies" width="1280" height="800" loading="lazy" />
+        </figure>
+
+        <h3>How it works</h3>
+        <div class="flow">
+          <div class="node">
+            <strong>Your PC</strong>
+            <span>The RyMessage app</span>
+          </div>
+          <div class="link"><span>home network or Tailscale</span></div>
+          <div class="node">
+            <strong>Your Mac</strong>
+            <span>The RyMessage server, running at login</span>
+          </div>
+          <div class="link"><span>reads and sends through</span></div>
+          <div class="node muted">
+            <strong>Messages</strong>
+            <span>Your iMessage and SMS conversations</span>
+          </div>
+        </div>
+
+        <ul class="features grid">
+          <li><strong>Notifications that float</strong> New texts slide in at the top of your screen, even with the window closed to the tray.</li>
+          <li><strong>The good stuff</strong> Reactions, threaded replies, live edits and unsends, jumbo emoji, and :shortcode: autocomplete.</li>
+          <li><strong>Photos, videos, files</strong> Drag them in, paste them, or pick them, and voice and video messages play inline.</li>
+          <li><strong>Your own sounds</strong> Upload a notification sound, then trim it and fade it right in the app.</li>
+        </ul>
+
+        <div class="notes">
+          <h4>Before you install</h4>
+          <ul>
+            <li>You need a Mac that stays on and signed in to Messages. Run the server's install script there and it prints a pairing code for the Windows app.</li>
+            <li>The PC and Mac need to reach each other. A private network like Tailscale works great.</li>
+            <li>It isn't code signed yet, so SmartScreen may warn on first run. Click More info, then Run anyway.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>Made by <a href="https://ryanpolasky.com" rel="noopener">Ryan Polasky</a>. Free and open source, provided as-is with no warranty.</p>
+      <p class="disclaimer">These are independent personal projects. They aren't affiliated with, endorsed by, sponsored by, or associated with Apple Inc., Google, Amazon, or the Connectivity Standards Alliance. Apple, iMessage, Messages, Apple Home, Mac, and macOS are trademarks of Apple Inc. Matter is a trademark of the Connectivity Standards Alliance. Names are only used to describe what the software works with. I built these on my own time, on my own equipment, at my own expense, for my own use, and they don't use or come from any confidential information belonging to Apple or any employer.</p>
+    </footer>
+  </body>
+</html>
