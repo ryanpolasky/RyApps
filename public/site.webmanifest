@@ -1,7 +1,7 @@
 {
-  "name": "RyApps - RyHome & RyMessage for Windows",
+  "name": "RyApps",
   "short_name": "RyApps",
-  "description": "Free, open-source Windows apps by Ryan Polasky: RyHome for Matter smart home devices and RyMessage for iMessage and SMS through your Mac.",
+  "description": "Free, open-source Windows apps by Ryan Polasky.",
   "lang": "en",
   "dir": "ltr",
   "categories": ["utilities", "lifestyle", "productivity"],
