@@ -3,17 +3,144 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>RyApps</title>
-    <meta name="description" content="RyHome and RyMessage: small Windows apps for your smart home and your texts, built by Ryan Polasky." />
-    <meta property="og:title" content="RyApps" />
-    <meta property="og:description" content="RyHome and RyMessage: small Windows apps for your smart home and your texts." />
+    <title>RyApps - RyHome &amp; RyMessage for Windows</title>
+    <meta
+      name="description"
+      content="RyHome and RyMessage: free, open-source Windows apps by Ryan Polasky. Control your Matter smart home directly from your PC, and read and send iMessage and SMS texts through your Mac."
+    />
+    <meta
+      name="keywords"
+      content="RyApps, RyHome, RyMessage, Matter smart home Windows, Matter controller Windows, iMessage on Windows, Apple Home Windows, smart home app Windows, Ryan Polasky"
+    />
+    <meta name="author" content="Ryan Polasky" />
+    <meta name="creator" content="Ryan Polasky" />
+    <meta name="publisher" content="Ryan Polasky" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+    <link rel="canonical" href="https://apps.ryanpolasky.com/" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="RyApps" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:url" content="https://apps.ryanpolasky.com/" />
+    <meta property="og:title" content="RyApps - RyHome &amp; RyMessage for Windows" />
+    <meta
+      property="og:description"
+      content="At home on Windows. Two free, open-source apps by Ryan Polasky: RyHome for Matter smart home control, and RyMessage for iMessage and SMS through your Mac."
+    />
     <meta property="og:image" content="https://apps.ryanpolasky.com/shots/ryhome-home.webp" />
+    <meta property="og:image:type" content="image/webp" />
+    <meta property="og:image:width" content="2560" />
+    <meta property="og:image:height" content="1600" />
+    <meta
+      property="og:image:alt"
+      content="RyHome on Windows showing Matter lights, shades, thermostat, sensors, and room controls"
+    />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="RyApps - RyHome &amp; RyMessage for Windows" />
+    <meta
+      name="twitter:description"
+      content="At home on Windows. Two free, open-source apps by Ryan Polasky: RyHome for Matter smart home control, and RyMessage for iMessage and SMS through your Mac."
+    />
+    <meta name="twitter:image" content="https://apps.ryanpolasky.com/shots/ryhome-home.webp" />
+    <meta
+      name="twitter:image:alt"
+      content="RyHome on Windows showing Matter lights, shades, thermostat, sensors, and room controls"
+    />
     <meta name="theme-color" content="#f9f9f6" />
+    <meta name="application-name" content="RyApps" />
+    <meta name="format-detection" content="telephone=no" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/site.webmanifest" />
     <link rel="stylesheet" href="/src/style.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Person",
+            "@id": "https://ryanpolasky.com/#person",
+            "name": "Ryan Polasky",
+            "givenName": "Ryan",
+            "familyName": "Polasky",
+            "url": "https://ryanpolasky.com/",
+            "jobTitle": "Software Engineer",
+            "sameAs": [
+              "https://ryanpolasky.com/",
+              "https://github.com/ryanpolasky",
+              "https://www.linkedin.com/in/ryan-polasky/"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://apps.ryanpolasky.com/#website",
+            "url": "https://apps.ryanpolasky.com/",
+            "name": "RyApps",
+            "alternateName": "RyApps - At home on Windows",
+            "description": "Free, open-source Windows apps by Ryan Polasky: RyHome for Matter smart home devices and RyMessage for iMessage and SMS through your Mac.",
+            "inLanguage": "en",
+            "creator": { "@id": "https://ryanpolasky.com/#person" },
+            "author": { "@id": "https://ryanpolasky.com/#person" },
+            "publisher": { "@id": "https://ryanpolasky.com/#person" }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://apps.ryanpolasky.com/#ryhome",
+            "name": "RyHome",
+            "alternateName": "RyHome for Windows",
+            "url": "https://apps.ryanpolasky.com/#ryhome",
+            "downloadUrl": "https://github.com/ryanpolasky/RyHome/releases/latest",
+            "codeRepository": "https://github.com/ryanpolasky/RyHome",
+            "description": "A native Windows app for your Matter smart home with a built-in Matter controller. Control lights, groups, scenes, plugs, switches, locks, blinds, fans, thermostats, and sensors directly over your local network alongside Apple Home, Google Home, or Alexa.",
+            "image": "https://apps.ryanpolasky.com/shots/ryhome-home.webp",
+            "screenshot": [
+              "https://apps.ryanpolasky.com/shots/ryhome-home.webp",
+              "https://apps.ryanpolasky.com/shots/ryhome-color.webp"
+            ],
+            "applicationCategory": "LifestyleApplication",
+            "applicationSubCategory": "Smart Home Controller",
+            "operatingSystem": "Windows 10, Windows 11",
+            "softwareVersion": "0.1.0",
+            "inLanguage": "en",
+            "isPartOf": { "@id": "https://apps.ryanpolasky.com/#website" },
+            "creator": { "@id": "https://ryanpolasky.com/#person" },
+            "author": { "@id": "https://ryanpolasky.com/#person" },
+            "publisher": { "@id": "https://ryanpolasky.com/#person" },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock"
+            }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "https://apps.ryanpolasky.com/#rymessage",
+            "name": "RyMessage",
+            "alternateName": "RyMessage for Windows",
+            "url": "https://apps.ryanpolasky.com/#rymessage",
+            "downloadUrl": "https://github.com/ryanpolasky/RyMessage/releases/latest",
+            "codeRepository": "https://github.com/ryanpolasky/RyMessage",
+            "description": "A native Windows client for iMessage and SMS backed by a lightweight companion server on your Mac. Includes floating desktop notifications, reactions, threaded replies, live message edits and unsends, media attachments, and custom notification sounds.",
+            "image": "https://apps.ryanpolasky.com/shots/rymessage-chat.webp",
+            "screenshot": "https://apps.ryanpolasky.com/shots/rymessage-chat.webp",
+            "applicationCategory": "CommunicationApplication",
+            "applicationSubCategory": "Messaging Client",
+            "operatingSystem": "Windows 10, Windows 11",
+            "softwareVersion": "0.2.5",
+            "inLanguage": "en",
+            "isPartOf": { "@id": "https://apps.ryanpolasky.com/#website" },
+            "creator": { "@id": "https://ryanpolasky.com/#person" },
+            "author": { "@id": "https://ryanpolasky.com/#person" },
+            "publisher": { "@id": "https://ryanpolasky.com/#person" },
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD",
+              "availability": "https://schema.org/InStock"
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <header class="hero">
