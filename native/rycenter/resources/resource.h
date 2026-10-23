@@ -1,0 +1,5 @@
+#define IDI_APP 101
+#define IDD_SETTINGS 102
+#define IDC_HOTKEY 1001
+#define IDC_AUTO 1002
+#define IDC_STARTUP 1003

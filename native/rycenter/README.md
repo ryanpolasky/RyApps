@@ -1,0 +1,62 @@
+# RyCenter
+
+A little more centered. A free, MIT-licensed, native Windows utility with one job: center the active window on its current monitor, without resizing it.
+
+## Use
+
+Windows 10 1703 or later / Windows 11, x64. Run **RyCenter.exe**, choose your settings, then press **Ctrl+Alt+C**. Click the tray icon for Settings, or right-click it for Settings / Quit. Running the executable again opens Settings instead of starting another copy.
+
+- Shortcut is configurable; it must include Ctrl or Alt. Conflicting/reserved shortcuts are rejected without losing the previous shortcut.
+- Centers the visible window frame inside the monitor's work area, excluding the taskbar. Handles negative monitor coordinates and mixed DPI scaling.
+- Does not resize, activate, or change the stacking order of the target window. Minimized, maximized, fullscreen, cloaked, and utility windows are skipped. Windows larger than the work area align to its top/left on the overflowing axis so the title bar stays reachable.
+- **Automatic centering is off by default.** Opt in to center newly created app windows once, after a 250 ms settling delay. Existing windows, restored windows, owned dialogs, and windows moved/resized during that delay are left alone. Apps that reposition themselves later can override centering; RyCenter does not keep fighting them.
+- Launch at login is opt-in and per-user. Keep the executable in a permanent location before enabling it. If you move it, save Settings again to update the startup path. Windows Startup Apps can separately disable the entry.
+- No installation, admin privileges, accounts, ads, telemetry, network requests, or automatic updater. The executable is not code signed; Windows may show a SmartScreen warning. Elevated apps may not accept moves from a normal-privilege process.
+
+## Download / build status
+
+This is a preview, not a published release. The **RyCenter** GitHub Actions workflow builds a portable `RyCenter-windows-x64` artifact for each PR and main-branch change. Download it from a successful run (GitHub login required). It contains the executable, this README, and the MIT license. No installer or runtime download is required.
+
+Windows CI runs real Win32 integration checks in addition to the portable geometry tests. They do not replace manual checks with multiple physical monitors, mixed scaling, different apps, and Explorer restarts. Memory/CPU numbers are deliberately not advertised until measured on real Windows.
+
+## Overhead
+
+C++17 and Win32, one process, one message-loop thread. The default mode uses `RegisterHotKey` and blocks in `GetMessage`: **no polling, keyboard hook, timers, window scanning, rendering loop, or background network work**. A native Settings dialog exists only while open.
+
+Opt-in automatic mode registers out-of-process accessibility event hooks for window creation/show/destruction and drag-start, with no DLL injection. It uses a one-shot settling timer per newly shown app window and unregisters hooks/timers when disabled. The default mode registers none of those hooks. The C/C++ runtime is statically linked; only Windows system DLLs are imported.
+
+Settings: `HKCU\Software\RyCenter`. Optional startup entry: `HKCU\Software\Microsoft\Windows\CurrentVersion\Run\RyCenter`. To remove: uncheck Start with Windows, save, quit, and delete the executable. Delete the settings key too if you want to remove your preferences.
+
+## Build
+
+On Windows, install Visual Studio 2022 Build Tools (Desktop development with C++) and CMake. From this directory:
+
+```powershell
+cmake -S . -B build -A x64
+cmake --build build --config Release
+ctest --test-dir build -C Release --output-on-failure
+```
+
+Output: `build/Release/RyCenter.exe`. `/W4 /WX`, static runtime, size optimization, and link-time optimization are enabled for release builds.
+
+Linux/macOS geometry tests:
+
+```sh
+cmake -S . -B build-tests -DCMAKE_BUILD_TYPE=Release
+cmake --build build-tests
+ctest --test-dir build-tests --output-on-failure
+```
+
+Linux x64 cross-build with MinGW-w64 (Ubuntu: `sudo apt-get install g++-mingw-w64-x86-64 cmake`):
+
+```sh
+cmake -S . -B build-mingw -DCMAKE_SYSTEM_NAME=Windows \
+  -DCMAKE_CXX_COMPILER=x86_64-w64-mingw32-g++ \
+  -DCMAKE_RC_COMPILER=x86_64-w64-mingw32-windres \
+  -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+cmake --build build-mingw
+```
+
+Formatting: `clang-format --dry-run --Werror src/*.cpp src/*.h tests/*.cpp`.
+
+The native icon is generated from the site's `public/rycenter.svg` using ImageMagick, from the repository root: `convert -background none public/rycenter.svg -define icon:auto-resize=256,64,48,32,24,16 native/rycenter/resources/app.ico`.

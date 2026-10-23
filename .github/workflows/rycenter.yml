@@ -1,0 +1,49 @@
+name: RyCenter
+
+on:
+  push:
+    branches: [main]
+    paths: ['native/rycenter/**', '.github/workflows/rycenter.yml']
+  pull_request:
+    paths: ['native/rycenter/**', '.github/workflows/rycenter.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  portable-tests:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check formatting
+        run: clang-format --dry-run --Werror native/rycenter/src/*.cpp native/rycenter/src/*.h native/rycenter/tests/*.cpp
+      - name: Configure
+        run: cmake -S native/rycenter -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build
+        run: cmake --build build --parallel
+      - name: Geometry tests
+        run: ctest --test-dir build --output-on-failure
+
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S native/rycenter -B build -A x64
+      - name: Build native executable and tests
+        run: cmake --build build --config Release --parallel
+      - name: Geometry and Win32 integration tests
+        run: ctest --test-dir build -C Release --output-on-failure
+      - name: Package portable app
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path package
+          Copy-Item build/Release/RyCenter.exe, native/rycenter/README.md, native/rycenter/LICENSE package/
+          Get-FileHash package/RyCenter.exe -Algorithm SHA256 | Format-List
+          (Get-Item package/RyCenter.exe).Length
+      - uses: actions/upload-artifact@v4
+        with:
+          name: RyCenter-windows-x64
+          path: package/
+          if-no-files-found: error

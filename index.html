@@ -10,7 +10,7 @@
     />
     <meta
       name="keywords"
-      content="RyApps, RyHome, RyMessage, Matter smart home Windows, Matter controller Windows, iMessage on Windows, Apple Home Windows, smart home app Windows, Ryan Polasky"
+      content="RyApps, RyHome, RyMessage, RyCenter, center windows, Windows centering tool, Matter smart home Windows, Matter controller Windows, iMessage on Windows, Apple Home Windows, smart home app Windows, Ryan Polasky"
     />
     <meta name="author" content="Ryan Polasky" />
     <meta name="creator" content="Ryan Polasky" />
@@ -151,7 +151,8 @@
         <div class="nav-links">
           <a href="#ryhome">RyHome</a>
           <a href="#rymessage">RyMessage</a>
-          <a href="https://github.com/ryanpolasky" rel="noopener">GitHub</a>
+          <a href="#rycenter">RyCenter</a>
+          <a class="nav-github" href="https://github.com/ryanpolasky" rel="noopener">GitHub</a>
         </div>
       </div>
     </nav>
@@ -178,6 +179,15 @@
           </div>
           <div class="card-preview"><img src="/shots/rymessage-chat.webp" alt="Preview of a RyMessage conversation" width="1280" height="800" /></div>
           <span class="card-caption">iMessage and SMS. Through your Mac.</span>
+        </a>
+        <a class="app-card center" href="#rycenter">
+          <div class="card-heading">
+            <img src="/rycenter.svg" alt="" width="44" height="44" />
+            <div><h2>RyCenter</h2><p>A little more centered.</p></div>
+            <span class="arrow" aria-hidden="true">&nearr;</span>
+          </div>
+          <div class="card-preview"><img src="/shots/rycenter-diagram.svg" alt="Illustration of a window centered on its monitor" width="1280" height="800" /></div>
+          <span class="card-caption">Your windows. In their place. <span class="preview-label">Preview</span></span>
         </a>
       </div>
     </header>
@@ -307,6 +317,42 @@
             <li>The PC and Mac need to reach each other. A private network like Tailscale works great.</li>
             <li>Incoming tapbacks, threaded replies, edits, and unsends show up, but sending tapbacks or inline replies and editing or unsending your own texts from Windows aren't supported yet (Messages.app doesn't expose those cleanly).</li>
             <li>It isn't code signed yet, so SmartScreen may warn on first run. Click More info, then Run anyway.</li>
+          </ul>
+        </div>
+      </section>
+      <section class="app center" id="rycenter">
+        <div class="app-head">
+          <img src="/rycenter.svg" alt="" width="72" height="72" />
+          <div>
+            <h2>RyCenter <span class="preview-label">Preview</span></h2>
+            <p class="tagline">Right in the middle.</p>
+          </div>
+        </div>
+        <p class="summary">One shortcut. A nicely centered window. RyCenter puts the window you're using in the middle of its monitor, without changing its size. A tiny, native utility that stays out of your way.</p>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/ryanpolasky/RyApps/actions/workflows/rycenter.yml" rel="noopener">Get a preview build</a>
+          <a class="button" href="https://github.com/ryanpolasky/RyApps/tree/main/native/rycenter" rel="noopener">View on GitHub</a>
+        </div>
+        <p class="build-note">Preview builds are GitHub Actions artifacts, not a published release. GitHub sign-in required.</p>
+        <figure class="center-illustration">
+          <img src="/shots/rycenter-diagram.svg" alt="Illustration: a window centered inside the desktop, leaving space for the taskbar" width="1280" height="800" loading="lazy" />
+          <figcaption>Same window. Same size. Just centered. Illustration, not an app screenshot.</figcaption>
+        </figure>
+        <ul class="features grid">
+          <li><strong>Whatever monitor you're on</strong> Centers the visible window frame inside the usable desktop, accounting for taskbars and different display scaling.</li>
+          <li><strong>Your shortcut, your choice</strong> Ctrl + Alt + C by default. Change it from the tray, and optionally have RyCenter start with Windows.</li>
+          <li><strong>Automatic, if you want it</strong> Opt in to center newly opened app windows once. No tug-of-war with windows you're moving, no rearranging your existing layout.</li>
+          <li><strong>Small by design</strong> Native C++ and Win32. No webview, bundled runtime installer, polling loop, network requests, ads, or telemetry. Free and open source.</li>
+        </ul>
+        <div class="notes">
+          <h4>Before you try the preview</h4>
+          <ul>
+            <li>For Windows 10 (1703 or later) and Windows 11, x64. Download the RyCenter-windows-x64 artifact from a successful build, extract it, and run RyCenter.exe.</li>
+            <li>Shortcut-only by default. Click its tray icon for Settings; right-click for Settings or Quit.</li>
+            <li>Minimized, maximized, fullscreen, and utility windows are left alone. Oversized windows stay their original size, with their top/left kept reachable.</li>
+            <li>Some apps manage their own position, and apps running as administrator may not accept moves. Automatic centering skips owned dialogs and windows that move or resize during its brief settling delay.</li>
+            <li>Multi-monitor behavior and real-world CPU/memory usage still need manual Windows verification. There are no measured performance claims yet.</li>
+            <li>It isn't code signed. Windows SmartScreen may warn on first run. There is no automatic updater.</li>
           </ul>
         </div>
       </section>

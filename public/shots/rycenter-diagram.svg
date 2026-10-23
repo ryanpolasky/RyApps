@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" role="img" aria-label="Illustration of a window centered inside a monitor's usable desktop">
+  <defs>
+    <linearGradient id="desktop" x2="1" y2="1"><stop stop-color="#d8e8f0"/><stop offset="1" stop-color="#b0cadc"/></linearGradient>
+    <filter id="shadow" x="-25%" y="-35%" width="150%" height="180%"><feDropShadow dy="12" stdDeviation="16" flood-color="#25455f" flood-opacity=".15"/></filter>
+  </defs>
+  <rect width="1280" height="800" fill="#eaf0f3"/>
+  <text x="64" y="72" font-family="Segoe UI,Arial,sans-serif" font-size="22" fill="#4c6b80">A little more centered.</text>
+  <rect x="64" y="108" width="1152" height="566" rx="15" fill="url(#desktop)"/>
+  <g stroke="#779db7" stroke-width="2" stroke-dasharray="6 8" opacity=".6"><path d="M640 131v502M88 371h1104"/></g>
+  <g filter="url(#shadow)">
+    <rect x="370" y="196" width="540" height="350" rx="12" fill="#fff"/>
+    <path d="M382 196h516q12 0 12 12v28H370v-28q0-12 12-12" fill="#f7f9fb"/>
+    <circle cx="390" cy="216" r="5" fill="#6e9fc1"/>
+    <text x="406" y="222" font-family="Segoe UI,Arial,sans-serif" font-size="16" fill="#516778">Your window</text>
+    <path d="M800 216h12m30-5h11v11h-11m32-11 11 11m0-11-11 11" fill="none" stroke="#83939f" stroke-width="1.5"/>
+    <rect x="404" y="272" width="186" height="15" rx="7" fill="#dce7ee"/>
+    <g fill="#eff3f6"><rect x="404" y="307" width="458" height="10" rx="5"/><rect x="404" y="330" width="410" height="10" rx="5"/><rect x="404" y="353" width="434" height="10" rx="5"/></g>
+    <rect x="404" y="398" width="458" height="111" rx="8" fill="#f0f5f8"/>
+    <path d="M613 454h54m-27-27v54" stroke="#a8c0d1" stroke-width="3"/>
+  </g>
+  <path d="M64 638h1152v21q0 15-15 15H79q-15 0-15-15" fill="#edf3f7"/>
+  <g fill="#9fb8ca"><rect x="588" y="649" width="15" height="15" rx="3"/><rect x="617" y="649" width="15" height="15" rx="3"/><rect x="646" y="649" width="15" height="15" rx="3"/><rect x="675" y="649" width="15" height="15" rx="3"/></g>
+  <text x="640" y="738" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="22" fill="#526e83">Ctrl + Alt + C</text>
+  <text x="1216" y="754" text-anchor="end" font-family="Segoe UI,Arial,sans-serif" font-size="14" fill="#7f939f">Illustration</text>
+</svg>
