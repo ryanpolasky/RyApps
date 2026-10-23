@@ -1,6 +1,7 @@
 #include <windows.h>
 #include <commctrl.h>
 #include <dwmapi.h>
+#include <objidl.h>
 #include <gdiplus.h>
 #include <windowsx.h>
 
@@ -224,7 +225,9 @@ void paintControl(Graphics &graphics, HWND control, const Appearance &state, Rec
                        : id == IDC_FOOTER                         ? Color(255, 248, 248, 250)
                                                                   : background);
         const bool title = id == IDC_TITLE;
-        const float size = title ? 24 : id == IDC_SUBTITLE || id == IDC_SHORTCUT_LABEL ? 13 : 11;
+        const float size = title                                            ? 24.0f
+                           : id == IDC_SUBTITLE || id == IDC_SHORTCUT_LABEL ? 13.0f
+                                                                            : 11.0f;
         const auto alignment =
             title || id == IDC_SUBTITLE ? StringAlignmentCenter : StringAlignmentNear;
         text(graphics, label, rect, size,

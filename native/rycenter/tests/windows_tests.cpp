@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <functional>
 #include <stdexcept>
+#include <objidl.h>
 #include <gdiplus.h>
 
 namespace {
