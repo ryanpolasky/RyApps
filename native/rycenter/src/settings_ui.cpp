@@ -174,11 +174,11 @@ void paintControl(Graphics &graphics, HWND control, const Appearance &state, Rec
         if (hovered || pressed)
             rounded(graphics, {1, 1, rect.Width - 2, rect.Height - 2}, 10,
                     pressed ? Color(255, 239, 242, 248) : Color(255, 249, 250, 252));
-        text(graphics, label, {16, 10, rect.Width - 84, 24}, 13, ink, true);
+        text(graphics, label, {6, 8, rect.Width - 74, 24}, 13, ink, true);
         text(graphics, id == IDC_AUTO ? L"Once, when they open." : L"Ready at login.",
-             {16, 32, rect.Width - 84, 20}, 11, muted);
+             {6, 30, rect.Width - 74, 20}, 11, muted);
         const bool checked = SendMessageW(control, BM_GETCHECK, 0, 0) == BST_CHECKED;
-        const float toggleX = rect.Width - 52;
+        const float toggleX = rect.Width - 42;
         const float toggleY = (rect.Height - 21) / 2;
         rounded(graphics, {toggleX, toggleY, 34, 21}, 10.5f,
                 checked ? blue : Color(255, 217, 217, 223));
@@ -340,8 +340,8 @@ void layout(HWND dialog, UINT dpi, const RECT *suggested) {
     move(dialog, IDC_HOTKEY, 214, 326, 244, 40, state->scale);
     move(dialog, IDC_HINT, 44, 372, 250, 22, state->scale);
     move(dialog, IDC_RESET, 354, 370, 104, 26, state->scale);
-    move(dialog, IDC_AUTO, 30, 428, 440, 67, state->scale);
-    move(dialog, IDC_STARTUP, 30, 498, 440, 66, state->scale);
+    move(dialog, IDC_AUTO, 40, 432, 420, 60, state->scale);
+    move(dialog, IDC_STARTUP, 40, 500, 420, 60, state->scale);
     move(dialog, IDC_STATUS, 30, 578, 440, 40, state->scale);
     move(dialog, IDC_FOOTER, 28, 646, 230, 40, state->scale);
     move(dialog, IDCANCEL, 308, 650, 80, 34, state->scale);

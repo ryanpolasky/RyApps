@@ -440,8 +440,8 @@ void runSettingsChecks() {
                 throw std::runtime_error(settingsFailure);
             require(loadOptions(), "reload persisted settings after dialog closes");
         };
-        const auto gdiBefore = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
         run(SettingsCheck::Visual);
+        const auto gdiBefore = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
         run(SettingsCheck::Cancel);
         require(options.hotkey == rycenter::defaultShortcut, "Cancel does not persist a draft");
         run(SettingsCheck::Save);
@@ -460,8 +460,9 @@ void runSettingsChecks() {
         run(SettingsCheck::ResetSave);
         require(options.hotkey == rycenter::defaultShortcut && hotkeyRegistered,
                 "Reset then Save persists and registers Ctrl+Alt+C");
-        require(GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS) <= gdiBefore + 4,
-                "closing settings releases its fonts, icon, brushes, and paint buffers");
+        const auto gdiAfter = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
+        std::printf("GDI objects after first open: %lu, after 7 more: %lu\n", gdiBefore, gdiAfter);
+        require(gdiAfter <= gdiBefore + 2, "reopening settings does not accumulate GDI objects");
         UnregisterHotKey(messageWindow, hotkeyId);
         hotkeyRegistered = false;
     } catch (...) {
