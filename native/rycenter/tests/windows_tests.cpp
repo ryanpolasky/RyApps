@@ -332,6 +332,7 @@ INT_PTR CALLBACK settingsTestProc(HWND dialog, UINT message, WPARAM wparam, LPAR
     if (message != WM_TIMER)
         return settingsProc(dialog, message, wparam, lparam);
     KillTimer(dialog, 1);
+    ShowWindow(dialog, SW_SHOWNA);
     try {
         require(!shortcutDraft.recording && hotkeyRegistered,
                 "opening settings does not start recording or disable the shortcut");
@@ -389,8 +390,9 @@ INT_PTR CALLBACK settingsTestProc(HWND dialog, UINT message, WPARAM wparam, LPAR
                     "reserve a competing shortcut");
             typeShortcut(dialog, VK_F22, HOTKEYF_CONTROL | HOTKEYF_ALT);
             SendMessageW(dialog, WM_COMMAND, IDOK, 0);
-            require(IsWindowVisible(dialog) && options.hotkey == before && hotkeyRegistered,
-                    "conflict leaves settings open and preserves the working shortcut");
+            require(IsWindowVisible(dialog), "conflict leaves settings open");
+            require(options.hotkey == before && hotkeyRegistered,
+                    "conflict preserves the working shortcut");
             wchar_t status[128]{};
             GetDlgItemTextW(dialog, IDC_STATUS, status, static_cast<int>(std::size(status)));
             require(std::wstring(status).find(L"in use") != std::wstring::npos,
