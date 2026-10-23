@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <functional>
 #include <stdexcept>
+#include <gdiplus.h>
 
 namespace {
 constexpr wchar_t fixtureClass[] = L"RyCenter.TestFixture";
@@ -243,8 +244,62 @@ void runChecks(Fixture &fixture) {
             "new windows stay where they open in shortcut-only mode");
 }
 
-enum class SettingsCheck { Cancel, Save, ResetCancel, ResetSave, Conflict, Escape, FocusLoss };
+enum class SettingsCheck {
+    Visual,
+    Cancel,
+    Save,
+    ResetCancel,
+    ResetSave,
+    Conflict,
+    Escape,
+    FocusLoss
+};
 std::string settingsFailure;
+
+void captureSettings(HWND dialog, const wchar_t *path) {
+    RECT rect;
+    GetClientRect(dialog, &rect);
+    const auto screen = GetDC(dialog);
+    const auto dc = CreateCompatibleDC(screen);
+    const auto bitmap = CreateCompatibleBitmap(screen, rect.right, rect.bottom);
+    const auto old = SelectObject(dc, bitmap);
+    SendMessageW(dialog, WM_PRINT, reinterpret_cast<WPARAM>(dc),
+                 PRF_CLIENT | PRF_CHILDREN | PRF_ERASEBKGND);
+    bool saved = false;
+    {
+        Gdiplus::Bitmap image(bitmap, nullptr);
+        const CLSID png = {0x557cf406, 0x1a04, 0x11d3, {0x9a, 0x73, 0, 0, 0xf8, 0x1e, 0xf3, 0x2e}};
+        saved = image.Save(path, &png, nullptr) == Gdiplus::Ok;
+    }
+    SelectObject(dc, old);
+    DeleteObject(bitmap);
+    DeleteDC(dc);
+    ReleaseDC(dialog, screen);
+    require(saved, "capture the native Windows settings render");
+}
+
+void checkLayout(HWND dialog, UINT dpi) {
+    rycenter::ui::layout(dialog, dpi);
+    RECT client;
+    GetClientRect(dialog, &client);
+    for (HWND control = GetWindow(dialog, GW_CHILD); control;
+         control = GetWindow(control, GW_HWNDNEXT)) {
+        RECT rect;
+        GetWindowRect(control, &rect);
+        MapWindowPoints(nullptr, dialog, reinterpret_cast<POINT *>(&rect), 2);
+        require(rect.left >= 0 && rect.top >= 0 && rect.right <= client.right &&
+                    rect.bottom <= client.bottom && rect.right > rect.left &&
+                    rect.bottom > rect.top,
+                "DPI layout keeps every native control inside the window");
+    }
+    RECT window;
+    GetWindowRect(dialog, &window);
+    MONITORINFO monitor{sizeof(monitor), {}, {}, 0};
+    GetMonitorInfoW(MonitorFromWindow(dialog, MONITOR_DEFAULTTONEAREST), &monitor);
+    require(window.top >= monitor.rcWork.top && window.bottom <= monitor.rcWork.bottom &&
+                window.left >= monitor.rcWork.left && window.right <= monitor.rcWork.right,
+            "scaled settings fit the available monitor work area");
+}
 
 void typeShortcut(HWND dialog, UINT key, BYTE modifiers, bool release = true) {
     const auto control = GetDlgItem(dialog, IDC_HOTKEY);
@@ -282,7 +337,31 @@ INT_PTR CALLBACK settingsTestProc(HWND dialog, UINT message, WPARAM wparam, LPAR
         require(shortcutDraft.value == options.hotkey, "reopen shows the saved shortcut");
         const auto check = static_cast<SettingsCheck>(GetWindowLongPtrW(dialog, DWLP_USER));
         const auto before = options.hotkey;
-        if (check == SettingsCheck::ResetCancel || check == SettingsCheck::ResetSave) {
+        if (check == SettingsCheck::Visual) {
+            checkLayout(dialog, 96);
+            captureSettings(dialog, L"settings-studio.png");
+            SendDlgItemMessageW(dialog, IDC_AUTO, BM_CLICK, 0, 0);
+            SendDlgItemMessageW(dialog, IDC_STARTUP, BM_CLICK, 0, 0);
+            require(IsDlgButtonChecked(dialog, IDC_AUTO) == BST_CHECKED &&
+                        IsDlgButtonChecked(dialog, IDC_STARTUP) == BST_CHECKED,
+                    "native checkboxes retain real toggle behavior behind custom drawing");
+            captureSettings(dialog, L"settings-studio-enabled.png");
+            SetFocus(GetDlgItem(dialog, IDC_HOTKEY));
+            captureSettings(dialog, L"settings-studio-recording.png");
+            MSG tab{};
+            tab.hwnd = GetDlgItem(dialog, IDC_HOTKEY);
+            tab.message = WM_KEYDOWN;
+            tab.wParam = VK_TAB;
+            require(IsDialogMessageW(dialog, &tab) && !shortcutDraft.recording && hotkeyRegistered,
+                    "Tab exits shortcut recording through normal dialog navigation");
+            checkLayout(dialog, 144);
+            captureSettings(dialog, L"settings-studio-150.png");
+            checkLayout(dialog, 192);
+            captureSettings(dialog, L"settings-studio-200-fit.png");
+            rycenter::ui::setStatus(dialog, L"The shortcut is in use. Try another.", true);
+            captureSettings(dialog, L"settings-studio-error.png");
+            SendMessageW(dialog, WM_COMMAND, IDC_CLOSE, 0);
+        } else if (check == SettingsCheck::ResetCancel || check == SettingsCheck::ResetSave) {
             const bool startup = IsDlgButtonChecked(dialog, IDC_STARTUP) == BST_CHECKED;
             SendMessageW(dialog, WM_COMMAND, IDC_RESET, 0);
             require(shortcutDraft.value == rycenter::defaultShortcut && !shortcutDraft.recording,
@@ -360,6 +439,8 @@ void runSettingsChecks() {
                 throw std::runtime_error(settingsFailure);
             require(loadOptions(), "reload persisted settings after dialog closes");
         };
+        const auto gdiBefore = GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS);
+        run(SettingsCheck::Visual);
         run(SettingsCheck::Cancel);
         require(options.hotkey == rycenter::defaultShortcut, "Cancel does not persist a draft");
         run(SettingsCheck::Save);
@@ -378,6 +459,8 @@ void runSettingsChecks() {
         run(SettingsCheck::ResetSave);
         require(options.hotkey == rycenter::defaultShortcut && hotkeyRegistered,
                 "Reset then Save persists and registers Ctrl+Alt+C");
+        require(GetGuiResources(GetCurrentProcess(), GR_GDIOBJECTS) <= gdiBefore + 4,
+                "closing settings releases its fonts, icon, brushes, and paint buffers");
         UnregisterHotKey(messageWindow, hotkeyId);
         hotkeyRegistered = false;
     } catch (...) {

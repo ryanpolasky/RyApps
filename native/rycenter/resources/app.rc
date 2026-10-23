@@ -5,22 +5,24 @@
 IDI_APP ICON "app.ico"
 1 RT_MANIFEST "app.manifest"
 
-IDD_SETTINGS DIALOGEX 0, 0, 280, 196
-STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+IDD_SETTINGS DIALOGEX 0, 0, 334, 374
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_CLIPCHILDREN
 CAPTION "RyCenter"
 FONT 9, "Segoe UI"
 BEGIN
-    LTEXT "A little more centered.", -1, 14, 12, 252, 12
-    LTEXT "Center the active window on its current monitor.", -1, 14, 29, 252, 12
-    LTEXT "Shortcut", -1, 14, 51, 54, 12
-    PUSHBUTTON "", IDC_HOTKEY, 72, 48, 144, 18
-    PUSHBUTTON "Reset", IDC_RESET, 222, 48, 44, 18
-    CONTROL "Center new app windows automatically", IDC_AUTO, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 14, 78, 252, 12
-    CONTROL "Start with Windows", IDC_STARTUP, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 14, 98, 252, 12
-    LTEXT "Free. Offline. No ads or telemetry.\nRyCenter 0.1.0 | apps.ryanpolasky.com", -1, 14, 121, 252, 24
-    LTEXT "Click the shortcut to record. Escape cancels recording.", IDC_STATUS, 14, 150, 252, 22
-    DEFPUSHBUTTON "Save", IDOK, 158, 174, 52, 16
-    PUSHBUTTON "Cancel", IDCANCEL, 216, 174, 50, 16
+    LTEXT "Right in the middle.", IDC_TITLE, 19, 58, 296, 18, SS_CENTER
+    LTEXT "One shortcut. A calmer desktop.", IDC_SUBTITLE, 19, 78, 296, 12, SS_CENTER
+    LTEXT "Center window", IDC_SHORTCUT_LABEL, 29, 177, 105, 16
+    LTEXT "Click to record.", IDC_HINT, 29, 198, 166, 12
+    PUSHBUTTON "", IDC_HOTKEY, 143, 174, 162, 21
+    PUSHBUTTON "Reset shortcut", IDC_RESET, 236, 197, 69, 14
+    CONTROL "Center new windows", IDC_AUTO, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 20, 228, 293, 36
+    CONTROL "Start with Windows", IDC_STARTUP, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 20, 266, 293, 35
+    LTEXT "", IDC_STATUS, 20, 308, 293, 22
+    LTEXT "RyCenter 0.1.0\nFree. Private. Entirely offline.", IDC_FOOTER, 19, 344, 153, 22
+    PUSHBUTTON "Cancel", IDCANCEL, 205, 347, 53, 18
+    DEFPUSHBUTTON "Save", IDOK, 264, 347, 51, 18
+    PUSHBUTTON "Close", IDC_CLOSE, 303, 2, 21, 15
 END
 
 1 VERSIONINFO

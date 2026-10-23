@@ -35,6 +35,12 @@ jobs:
         run: cmake --build build --config Release --parallel
       - name: Geometry and Win32 integration tests
         run: ctest --test-dir build -C Release --output-on-failure
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: RyCenter-native-ui
+          path: build/settings-*.png
+          if-no-files-found: warn
       - name: Package portable app
         shell: pwsh
         run: |

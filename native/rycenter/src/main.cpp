@@ -11,6 +11,7 @@
 
 #include "geometry.h"
 #include "resource.h"
+#include "settings_ui.h"
 #include "shortcut.h"
 
 namespace {
@@ -351,9 +352,12 @@ std::wstring shortcutLabel(DWORD shortcut) {
     return label + name;
 }
 
-void settingsStatus(HWND dialog, const wchar_t *text) { SetDlgItemTextW(dialog, IDC_STATUS, text); }
+void settingsStatus(HWND dialog, const wchar_t *text, bool error = false) {
+    rycenter::ui::setStatus(dialog, text, error);
+}
 
 void updateShortcutControl(HWND dialog) {
+    rycenter::ui::setRecording(dialog, shortcutDraft.recording);
     SetDlgItemTextW(dialog, IDC_HOTKEY,
                     shortcutDraft.recording && !capturedKey
                         ? L"Press a shortcut…"
@@ -371,9 +375,10 @@ void finishRecording(HWND dialog, bool accept) {
         updateTooltip();
     }
     updateShortcutControl(dialog);
-    settingsStatus(dialog, hotkeyRegistered
-                               ? L"Click the shortcut to record. Escape cancels recording."
-                               : L"Your saved shortcut is unavailable. Choose another and Save.");
+    settingsStatus(
+        dialog,
+        hotkeyRegistered ? L"" : L"Your saved shortcut is unavailable. Choose another and Save.",
+        !hotkeyRegistered);
 }
 
 void beginRecording(HWND dialog) {
@@ -435,7 +440,7 @@ LRESULT CALLBACK shortcutProc(HWND control, UINT message, WPARAM wparam, LPARAM 
                 capturedKey = static_cast<UINT>(wparam);
                 updateShortcutControl(dialog);
             } else {
-                settingsStatus(dialog, L"Include Ctrl, Alt, or Win with your shortcut.");
+                settingsStatus(dialog, L"Include Ctrl, Alt, or Win with your shortcut.", true);
             }
             return 0;
         }
@@ -449,7 +454,14 @@ LRESULT CALLBACK shortcutProc(HWND control, UINT message, WPARAM wparam, LPARAM 
     return DefSubclassProc(control, message, wparam, lparam);
 }
 
-INT_PTR CALLBACK settingsProc(HWND dialog, UINT message, WPARAM wparam, LPARAM) {
+INT_PTR CALLBACK settingsProc(HWND dialog, UINT message, WPARAM wparam, LPARAM lparam) {
+    INT_PTR result = 0;
+    if (rycenter::ui::handleMessage(dialog, message, wparam, lparam, result)) {
+        if (message >= WM_CTLCOLORMSGBOX && message <= WM_CTLCOLORSTATIC)
+            return result;
+        SetWindowLongPtrW(dialog, DWLP_MSGRESULT, result);
+        return TRUE;
+    }
     if (message == WM_INITDIALOG) {
         settingsWindow = dialog;
         SendMessageW(dialog, WM_SETICON, ICON_BIG,
@@ -458,6 +470,7 @@ INT_PTR CALLBACK settingsProc(HWND dialog, UINT message, WPARAM wparam, LPARAM) 
         shortcutDraft.value = static_cast<WORD>(options.hotkey);
         capturedKey = 0;
         shortcutSuspended = false;
+        rycenter::ui::initialize(dialog, instance);
         SetWindowSubclass(GetDlgItem(dialog, IDC_HOTKEY), shortcutProc, 1, 0);
         updateShortcutControl(dialog);
         CheckDlgButton(dialog, IDC_AUTO, options.automatic ? BST_CHECKED : BST_UNCHECKED);
@@ -483,14 +496,16 @@ INT_PTR CALLBACK settingsProc(HWND dialog, UINT message, WPARAM wparam, LPARAM) 
         next.hotkey = shortcutDraft.value;
         next.automatic = IsDlgButtonChecked(dialog, IDC_AUTO) == BST_CHECKED;
         if (!validHotkey(next.hotkey)) {
-            settingsStatus(dialog, L"Choose a shortcut with Ctrl, Alt, or Win and another key.");
+            settingsStatus(dialog, L"Choose a shortcut with Ctrl, Alt, or Win and another key.",
+                           true);
             return TRUE;
         }
         const bool changeHotkey =
             !rycenter::sameShortcut(next.hotkey, options.hotkey) || !hotkeyRegistered;
         const int nextId = hotkeyId == 1 ? 2 : 1;
         if (changeHotkey && !registerShortcut(next.hotkey, nextId)) {
-            settingsStatus(dialog, L"That shortcut is in use or reserved by Windows. Try another.");
+            settingsStatus(dialog, L"That shortcut is in use or reserved by Windows. Try another.",
+                           true);
             return TRUE;
         }
         const bool enable = next.automatic && !options.automatic;
@@ -499,7 +514,8 @@ INT_PTR CALLBACK settingsProc(HWND dialog, UINT message, WPARAM wparam, LPARAM) 
                 UnregisterHotKey(messageWindow, nextId);
             settingsStatus(
                 dialog,
-                L"Windows could not enable automatic centering. Your settings were not changed.");
+                L"Windows could not enable automatic centering. Your settings were not changed.",
+                true);
             return TRUE;
         }
         if (!saveOptions(next)) {
@@ -507,7 +523,8 @@ INT_PTR CALLBACK settingsProc(HWND dialog, UINT message, WPARAM wparam, LPARAM) 
                 disableAutomatic();
             if (changeHotkey)
                 UnregisterHotKey(messageWindow, nextId);
-            settingsStatus(dialog, L"Could not save your settings in your Windows user profile.");
+            settingsStatus(dialog, L"Could not save your settings in your Windows user profile.",
+                           true);
             return TRUE;
         }
         const bool startup = IsDlgButtonChecked(dialog, IDC_STARTUP) == BST_CHECKED;
@@ -517,7 +534,8 @@ INT_PTR CALLBACK settingsProc(HWND dialog, UINT message, WPARAM wparam, LPARAM) 
                 disableAutomatic();
             if (changeHotkey)
                 UnregisterHotKey(messageWindow, nextId);
-            settingsStatus(dialog, L"Could not change launch at login. Settings were not changed.");
+            settingsStatus(dialog, L"Could not change launch at login. Settings were not changed.",
+                           true);
             return TRUE;
         }
         if (changeHotkey) {
@@ -533,12 +551,14 @@ INT_PTR CALLBACK settingsProc(HWND dialog, UINT message, WPARAM wparam, LPARAM) 
         EndDialog(dialog, IDOK);
         return TRUE;
     }
-    if ((message == WM_COMMAND && LOWORD(wparam) == IDCANCEL) || message == WM_CLOSE) {
+    if ((message == WM_COMMAND && (LOWORD(wparam) == IDCANCEL || LOWORD(wparam) == IDC_CLOSE)) ||
+        message == WM_CLOSE) {
         EndDialog(dialog, IDCANCEL);
         return TRUE;
     }
     if (message == WM_DESTROY) {
         finishRecording(dialog, false);
+        rycenter::ui::destroy(dialog);
         settingsWindow = nullptr;
     }
     return FALSE;

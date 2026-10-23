@@ -18,11 +18,11 @@ Windows 10 1703 or later / Windows 11, x64. Run **RyCenter.exe**, choose your se
 
 This is a preview, not a published release. The **RyCenter** GitHub Actions workflow builds a portable `RyCenter-windows-x64` artifact for each PR and main-branch change. Download it from a successful run (GitHub login required). It contains the executable, this README, and the MIT license. No installer or runtime download is required.
 
-Windows CI runs real Win32 integration checks, including the Settings dialog's shortcut capture, save, cancel, reset, and conflict paths, in addition to portable geometry and shortcut-state tests. Settings tests redirect registry writes to a temporary isolated key. They do not replace real-keyboard checks or manual checks with multiple physical monitors, mixed scaling, different apps, and Explorer restarts. Memory/CPU numbers are deliberately not advertised until measured on real Windows.
+Windows CI runs real Win32 integration checks, including the Settings dialog's shortcut capture, save, cancel, reset, conflict, toggle, Tab navigation, and DPI-layout paths, in addition to portable geometry and shortcut-state tests. The `RyCenter-native-ui` artifact contains native renders of Settings, including recording/error states and larger DPI layouts. Settings tests redirect registry writes to a temporary isolated key. They do not replace real-keyboard checks or manual checks with multiple physical monitors, mixed scaling, different apps, and Explorer restarts. Memory/CPU numbers are deliberately not advertised until measured on real Windows.
 
 ## Overhead
 
-C++17 and Win32, one process, one message-loop thread. The default mode uses `RegisterHotKey` and blocks in `GetMessage`: **no polling, keyboard hook, timers, window scanning, rendering loop, or background network work**. A native Settings dialog exists only while open.
+C++17 and Win32, one process, one message-loop thread. The default mode uses `RegisterHotKey` and blocks in `GetMessage`: **no polling, keyboard hook, timers, window scanning, rendering loop, or background network work**. The Studio Settings window uses Windows GDI+ for event-driven painting only while open; its graphics resources are released when it closes. There is no webview or bundled UI runtime. High Contrast uses standard Windows controls and system colors.
 
 Opt-in automatic mode registers out-of-process accessibility event hooks for window creation/show/destruction and drag-start, with no DLL injection. It uses a one-shot settling timer per newly shown app window and unregisters hooks/timers when disabled. The default mode registers none of those hooks. The C/C++ runtime is statically linked; only Windows system DLLs are imported.
 
