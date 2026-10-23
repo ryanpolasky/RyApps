@@ -148,7 +148,7 @@ bool eligible(HWND hwnd, bool automatic) {
     GetWindowThreadProcessId(hwnd, &process);
     const auto style = GetWindowLongPtrW(hwnd, GWL_STYLE);
     const auto extended = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
-    if (process == GetCurrentProcessId() || (style & WS_CHILD) ||
+    if ((process == GetCurrentProcessId() && hwnd != settingsWindow) || (style & WS_CHILD) ||
         !(style & (WS_CAPTION | WS_THICKFRAME)) ||
         (extended & (WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE))) {
         return false;

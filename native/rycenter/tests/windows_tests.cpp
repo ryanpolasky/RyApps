@@ -340,6 +340,18 @@ INT_PTR CALLBACK settingsTestProc(HWND dialog, UINT message, WPARAM wparam, LPAR
         const auto before = options.hotkey;
         if (check == SettingsCheck::Visual) {
             checkLayout(dialog, 96);
+            RECT placed;
+            GetWindowRect(dialog, &placed);
+            SetWindowPos(dialog, nullptr, placed.left - 40, placed.top - 30, 0, 0,
+                         SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+            require(centerWindow(dialog, false) == CenterResult::Centered,
+                    "the shortcut centers RyCenter's own Settings window");
+            pump(150);
+            RECT centered;
+            GetWindowRect(dialog, &centered);
+            require(std::abs(centered.left - placed.left) <= 2 &&
+                        std::abs(centered.top - placed.top) <= 2,
+                    "Settings returns to the middle of its monitor");
             captureSettings(dialog, L"settings-studio.png");
             SendDlgItemMessageW(dialog, IDC_AUTO, BM_CLICK, 0, 0);
             SendDlgItemMessageW(dialog, IDC_STARTUP, BM_CLICK, 0, 0);
