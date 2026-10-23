@@ -11,6 +11,7 @@
 
 #include "geometry.h"
 #include "resource.h"
+#include "shortcut.h"
 
 namespace {
 constexpr wchar_t windowClass[] = L"RyCenter.MessageWindow";
@@ -23,7 +24,7 @@ constexpr UINT quitCommand = 11;
 
 struct Options {
     DWORD version = 1;
-    DWORD hotkey = MAKEWORD('C', HOTKEYF_CONTROL | HOTKEYF_ALT);
+    DWORD hotkey = rycenter::defaultShortcut;
     DWORD automatic = 0;
 };
 
@@ -47,19 +48,15 @@ std::vector<PendingWindow> pending;
 UINT_PTR nextTimer = 100;
 NOTIFYICONDATAW tray{};
 UINT taskbarCreated;
+rycenter::ShortcutDraft shortcutDraft;
+UINT capturedKey = 0;
+bool shortcutSuspended = false;
 
 void showError(HWND owner, const wchar_t *text) {
     MessageBoxW(owner, text, L"RyCenter", MB_OK | MB_ICONWARNING);
 }
 
-bool validHotkey(DWORD hotkey) {
-    const auto key = LOBYTE(hotkey);
-    const auto modifiers = HIBYTE(hotkey);
-    return hotkey <= 0xffff && key >= VK_BACK && key < 0xff && key != VK_SHIFT &&
-           key != VK_CONTROL && key != VK_MENU && key != VK_LWIN && key != VK_RWIN &&
-           (modifiers & (HOTKEYF_CONTROL | HOTKEYF_ALT)) != 0 &&
-           (modifiers & ~(HOTKEYF_CONTROL | HOTKEYF_ALT | HOTKEYF_SHIFT | HOTKEYF_EXT)) == 0;
-}
+bool validHotkey(DWORD hotkey) { return rycenter::validShortcut(hotkey); }
 
 bool loadOptions() {
     Options stored;
@@ -132,6 +129,8 @@ bool registerShortcut(DWORD hotkey, int id) {
         modifiers |= MOD_ALT;
     if (flags & HOTKEYF_SHIFT)
         modifiers |= MOD_SHIFT;
+    if (flags & rycenter::Windows)
+        modifiers |= MOD_WIN;
     return RegisterHotKey(messageWindow, id, modifiers, LOBYTE(hotkey)) != FALSE;
 }
 
@@ -300,6 +299,8 @@ void updateTooltip() {
             label += L"Alt+";
         if (flags & HOTKEYF_SHIFT)
             label += L"Shift+";
+        if (flags & rycenter::Windows)
+            label += L"Win+";
         auto scan = MapVirtualKeyW(LOBYTE(options.hotkey), MAPVK_VK_TO_VSC);
         if (flags & HOTKEYF_EXT)
             scan |= 0x100;
@@ -330,37 +331,173 @@ bool addTrayIcon() {
     return true;
 }
 
+std::wstring shortcutLabel(DWORD shortcut) {
+    const auto flags = HIBYTE(shortcut);
+    std::wstring label;
+    if (flags & HOTKEYF_CONTROL)
+        label += L"Ctrl + ";
+    if (flags & HOTKEYF_ALT)
+        label += L"Alt + ";
+    if (flags & HOTKEYF_SHIFT)
+        label += L"Shift + ";
+    if (flags & rycenter::Windows)
+        label += L"Win + ";
+    auto scan = MapVirtualKeyW(LOBYTE(shortcut), MAPVK_VK_TO_VSC);
+    if (flags & HOTKEYF_EXT)
+        scan |= 0x100;
+    wchar_t name[64]{};
+    if (!GetKeyNameTextW(static_cast<LONG>(scan << 16), name, static_cast<int>(std::size(name))))
+        lstrcpynW(name, L"Key", static_cast<int>(std::size(name)));
+    return label + name;
+}
+
+void settingsStatus(HWND dialog, const wchar_t *text) { SetDlgItemTextW(dialog, IDC_STATUS, text); }
+
+void updateShortcutControl(HWND dialog) {
+    SetDlgItemTextW(dialog, IDC_HOTKEY,
+                    shortcutDraft.recording && !capturedKey
+                        ? L"Press a shortcut…"
+                        : shortcutLabel(shortcutDraft.value).c_str());
+}
+
+void finishRecording(HWND dialog, bool accept) {
+    if (!accept)
+        shortcutDraft.cancel();
+    shortcutDraft.recording = false;
+    capturedKey = 0;
+    if (shortcutSuspended) {
+        hotkeyRegistered = registerShortcut(options.hotkey, hotkeyId);
+        shortcutSuspended = false;
+        updateTooltip();
+    }
+    updateShortcutControl(dialog);
+    settingsStatus(dialog, hotkeyRegistered
+                               ? L"Click the shortcut to record. Escape cancels recording."
+                               : L"Your saved shortcut is unavailable. Choose another and Save.");
+}
+
+void beginRecording(HWND dialog) {
+    if (shortcutDraft.recording)
+        return;
+    shortcutDraft.begin();
+    capturedKey = 0;
+    if (hotkeyRegistered) {
+        UnregisterHotKey(messageWindow, hotkeyId);
+        hotkeyRegistered = false;
+        shortcutSuspended = true;
+    }
+    updateShortcutControl(dialog);
+    settingsStatus(dialog, L"Press Ctrl, Alt, or Win with another key. Escape cancels.");
+}
+
+BYTE keyboardModifiers() {
+    BYTE flags = 0;
+    if (GetKeyState(VK_CONTROL) & 0x8000)
+        flags |= HOTKEYF_CONTROL;
+    if (GetKeyState(VK_MENU) & 0x8000)
+        flags |= HOTKEYF_ALT;
+    if (GetKeyState(VK_SHIFT) & 0x8000)
+        flags |= HOTKEYF_SHIFT;
+    if ((GetKeyState(VK_LWIN) | GetKeyState(VK_RWIN)) & 0x8000)
+        flags |= rycenter::Windows;
+    return flags;
+}
+
+LRESULT CALLBACK shortcutProc(HWND control, UINT message, WPARAM wparam, LPARAM lparam, UINT_PTR,
+                              DWORD_PTR) {
+    const auto dialog = GetParent(control);
+    if (message == WM_GETDLGCODE && shortcutDraft.recording) {
+        const auto input = reinterpret_cast<const MSG *>(lparam);
+        if (input && input->wParam == VK_TAB && keyboardModifiers() == 0)
+            return DLGC_BUTTON;
+        return DLGC_BUTTON | DLGC_WANTALLKEYS;
+    }
+    if (message == WM_SETFOCUS) {
+        beginRecording(dialog);
+    } else if (message == WM_KILLFOCUS) {
+        if (shortcutDraft.recording)
+            finishRecording(dialog, false);
+    } else if (message == WM_KEYDOWN || message == WM_SYSKEYDOWN) {
+        if (shortcutDraft.recording) {
+            if ((lparam & (1LL << 30)) || capturedKey)
+                return 0;
+            const auto flags = keyboardModifiers();
+            if (wparam == VK_ESCAPE && !flags) {
+                finishRecording(dialog, false);
+                return 0;
+            }
+            if (wparam == VK_CONTROL || wparam == VK_MENU || wparam == VK_SHIFT ||
+                wparam == VK_LWIN || wparam == VK_RWIN)
+                return 0;
+            const auto extended = (lparam & (1LL << 24)) ? HOTKEYF_EXT : 0;
+            if (shortcutDraft.capture(static_cast<BYTE>(wparam),
+                                      static_cast<BYTE>(flags | extended))) {
+                capturedKey = static_cast<UINT>(wparam);
+                updateShortcutControl(dialog);
+            } else {
+                settingsStatus(dialog, L"Include Ctrl, Alt, or Win with your shortcut.");
+            }
+            return 0;
+        }
+    } else if ((message == WM_KEYUP || message == WM_SYSKEYUP) && shortcutDraft.recording) {
+        if (capturedKey == wparam)
+            finishRecording(dialog, true);
+        return 0;
+    } else if (message == WM_CHAR || message == WM_SYSCHAR) {
+        return 0;
+    }
+    return DefSubclassProc(control, message, wparam, lparam);
+}
+
 INT_PTR CALLBACK settingsProc(HWND dialog, UINT message, WPARAM wparam, LPARAM) {
     if (message == WM_INITDIALOG) {
         settingsWindow = dialog;
         SendMessageW(dialog, WM_SETICON, ICON_BIG,
                      reinterpret_cast<LPARAM>(LoadIconW(instance, MAKEINTRESOURCEW(IDI_APP))));
-        SendDlgItemMessageW(dialog, IDC_HOTKEY, HKM_SETHOTKEY, options.hotkey, 0);
+        shortcutDraft = {};
+        shortcutDraft.value = static_cast<WORD>(options.hotkey);
+        capturedKey = 0;
+        shortcutSuspended = false;
+        SetWindowSubclass(GetDlgItem(dialog, IDC_HOTKEY), shortcutProc, 1, 0);
+        updateShortcutControl(dialog);
         CheckDlgButton(dialog, IDC_AUTO, options.automatic ? BST_CHECKED : BST_UNCHECKED);
         CheckDlgButton(dialog, IDC_STARTUP, startsWithWindows() ? BST_CHECKED : BST_UNCHECKED);
+        SetFocus(GetDlgItem(dialog, IDOK));
+        return FALSE;
+    }
+    if (message == WM_COMMAND && LOWORD(wparam) == IDC_HOTKEY) {
+        beginRecording(dialog);
+        return TRUE;
+    }
+    if (message == WM_COMMAND && LOWORD(wparam) == IDC_RESET) {
+        finishRecording(dialog, false);
+        shortcutDraft.reset();
+        updateShortcutControl(dialog);
+        settingsStatus(dialog, L"Shortcut reset to Ctrl + Alt + C. Save to apply.");
         return TRUE;
     }
     if (message == WM_COMMAND && LOWORD(wparam) == IDOK) {
+        if (shortcutDraft.recording)
+            finishRecording(dialog, false);
         Options next = options;
-        next.hotkey =
-            static_cast<DWORD>(SendDlgItemMessageW(dialog, IDC_HOTKEY, HKM_GETHOTKEY, 0, 0));
+        next.hotkey = shortcutDraft.value;
         next.automatic = IsDlgButtonChecked(dialog, IDC_AUTO) == BST_CHECKED;
         if (!validHotkey(next.hotkey)) {
-            showError(dialog, L"Choose a shortcut that includes Ctrl or Alt and another key.");
+            settingsStatus(dialog, L"Choose a shortcut with Ctrl, Alt, or Win and another key.");
             return TRUE;
         }
-        const bool changeHotkey = next.hotkey != options.hotkey || !hotkeyRegistered;
+        const bool changeHotkey =
+            !rycenter::sameShortcut(next.hotkey, options.hotkey) || !hotkeyRegistered;
         const int nextId = hotkeyId == 1 ? 2 : 1;
         if (changeHotkey && !registerShortcut(next.hotkey, nextId)) {
-            showError(dialog,
-                      L"That shortcut is already in use or reserved by Windows. Choose another.");
+            settingsStatus(dialog, L"That shortcut is in use or reserved by Windows. Try another.");
             return TRUE;
         }
         const bool enable = next.automatic && !options.automatic;
         if (enable && !enableAutomatic()) {
             if (changeHotkey)
                 UnregisterHotKey(messageWindow, nextId);
-            showError(
+            settingsStatus(
                 dialog,
                 L"Windows could not enable automatic centering. Your settings were not changed.");
             return TRUE;
@@ -370,7 +507,7 @@ INT_PTR CALLBACK settingsProc(HWND dialog, UINT message, WPARAM wparam, LPARAM) 
                 disableAutomatic();
             if (changeHotkey)
                 UnregisterHotKey(messageWindow, nextId);
-            showError(dialog, L"Could not save your settings in your Windows user profile.");
+            settingsStatus(dialog, L"Could not save your settings in your Windows user profile.");
             return TRUE;
         }
         const bool startup = IsDlgButtonChecked(dialog, IDC_STARTUP) == BST_CHECKED;
@@ -380,7 +517,7 @@ INT_PTR CALLBACK settingsProc(HWND dialog, UINT message, WPARAM wparam, LPARAM) 
                 disableAutomatic();
             if (changeHotkey)
                 UnregisterHotKey(messageWindow, nextId);
-            showError(dialog, L"Could not change launch at login. Your settings were not changed.");
+            settingsStatus(dialog, L"Could not change launch at login. Settings were not changed.");
             return TRUE;
         }
         if (changeHotkey) {
@@ -400,8 +537,10 @@ INT_PTR CALLBACK settingsProc(HWND dialog, UINT message, WPARAM wparam, LPARAM) 
         EndDialog(dialog, IDCANCEL);
         return TRUE;
     }
-    if (message == WM_DESTROY)
+    if (message == WM_DESTROY) {
+        finishRecording(dialog, false);
         settingsWindow = nullptr;
+    }
     return FALSE;
 }
 

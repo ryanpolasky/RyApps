@@ -6,7 +6,8 @@ A little more centered. A free, MIT-licensed, native Windows utility with one jo
 
 Windows 10 1703 or later / Windows 11, x64. Run **RyCenter.exe**, choose your settings, then press **Ctrl+Alt+C**. Click the tray icon for Settings, or right-click it for Settings / Quit. Running the executable again opens Settings instead of starting another copy.
 
-- Shortcut is configurable; it must include Ctrl or Alt. Conflicting/reserved shortcuts are rejected without losing the previous shortcut.
+- Click the shortcut in Settings, then press Ctrl, Alt, or Win with another key. Release the key to finish recording; Escape cancels. The saved global shortcut is temporarily suspended only while recording, so it can be recorded again without firing. Most Win-key combinations and F12 are reserved by Windows; conflicting/reserved shortcuts are rejected without losing the previous shortcut.
+- **Reset** restores the shortcut to **Ctrl+Alt+C** without changing automatic centering or launch at login. **Save** applies the draft; **Cancel** discards it, including a reset.
 - Centers the visible window frame inside the monitor's work area, excluding the taskbar. Handles negative monitor coordinates and mixed DPI scaling.
 - Does not resize, activate, or change the stacking order of the target window. Minimized, maximized, fullscreen, cloaked, and utility windows are skipped. Windows larger than the work area align to its top/left on the overflowing axis so the title bar stays reachable.
 - **Automatic centering is off by default.** Opt in to center newly created app windows once, after a 250 ms settling delay. Existing windows, restored windows, owned dialogs, and windows moved/resized during that delay are left alone. Apps that reposition themselves later can override centering; RyCenter does not keep fighting them.
@@ -17,7 +18,7 @@ Windows 10 1703 or later / Windows 11, x64. Run **RyCenter.exe**, choose your se
 
 This is a preview, not a published release. The **RyCenter** GitHub Actions workflow builds a portable `RyCenter-windows-x64` artifact for each PR and main-branch change. Download it from a successful run (GitHub login required). It contains the executable, this README, and the MIT license. No installer or runtime download is required.
 
-Windows CI runs real Win32 integration checks in addition to the portable geometry tests. They do not replace manual checks with multiple physical monitors, mixed scaling, different apps, and Explorer restarts. Memory/CPU numbers are deliberately not advertised until measured on real Windows.
+Windows CI runs real Win32 integration checks, including the Settings dialog's shortcut capture, save, cancel, reset, and conflict paths, in addition to portable geometry and shortcut-state tests. Settings tests redirect registry writes to a temporary isolated key. They do not replace real-keyboard checks or manual checks with multiple physical monitors, mixed scaling, different apps, and Explorer restarts. Memory/CPU numbers are deliberately not advertised until measured on real Windows.
 
 ## Overhead
 

@@ -242,6 +242,154 @@ void runChecks(Fixture &fixture) {
     require(bounds(disabled).left == 30 && bounds(disabled).top == 40,
             "new windows stay where they open in shortcut-only mode");
 }
+
+enum class SettingsCheck { Cancel, Save, ResetCancel, ResetSave, Conflict, Escape, FocusLoss };
+std::string settingsFailure;
+
+void typeShortcut(HWND dialog, UINT key, BYTE modifiers, bool release = true) {
+    const auto control = GetDlgItem(dialog, IDC_HOTKEY);
+    SetFocus(control);
+    SendMessageW(dialog, WM_COMMAND, MAKEWPARAM(IDC_HOTKEY, BN_CLICKED),
+                 reinterpret_cast<LPARAM>(control));
+    require(shortcutDraft.recording && !hotkeyRegistered,
+            "focus starts recording and suspends the global shortcut");
+    BYTE previous[256]{};
+    GetKeyboardState(previous);
+    BYTE state[256]{};
+    state[VK_CONTROL] = modifiers & HOTKEYF_CONTROL ? 0x80 : 0;
+    state[VK_MENU] = modifiers & HOTKEYF_ALT ? 0x80 : 0;
+    state[VK_SHIFT] = modifiers & HOTKEYF_SHIFT ? 0x80 : 0;
+    SetKeyboardState(state);
+    SendMessageW(control, WM_KEYDOWN, key, 1);
+    if (release)
+        SendMessageW(control, WM_KEYUP, key, 1);
+    SetKeyboardState(previous);
+}
+
+INT_PTR CALLBACK settingsTestProc(HWND dialog, UINT message, WPARAM wparam, LPARAM lparam) {
+    if (message == WM_INITDIALOG) {
+        settingsProc(dialog, message, wparam, lparam);
+        SetWindowLongPtrW(dialog, DWLP_USER, lparam);
+        SetTimer(dialog, 1, 10, nullptr);
+        return FALSE;
+    }
+    if (message != WM_TIMER)
+        return settingsProc(dialog, message, wparam, lparam);
+    KillTimer(dialog, 1);
+    try {
+        require(!shortcutDraft.recording && hotkeyRegistered,
+                "opening settings does not start recording or disable the shortcut");
+        require(shortcutDraft.value == options.hotkey, "reopen shows the saved shortcut");
+        const auto check = static_cast<SettingsCheck>(GetWindowLongPtrW(dialog, DWLP_USER));
+        const auto before = options.hotkey;
+        if (check == SettingsCheck::ResetCancel || check == SettingsCheck::ResetSave) {
+            const bool startup = IsDlgButtonChecked(dialog, IDC_STARTUP) == BST_CHECKED;
+            SendMessageW(dialog, WM_COMMAND, IDC_RESET, 0);
+            require(shortcutDraft.value == rycenter::defaultShortcut && !shortcutDraft.recording,
+                    "Reset restores Ctrl+Alt+C without saving yet");
+            require((IsDlgButtonChecked(dialog, IDC_STARTUP) == BST_CHECKED) == startup &&
+                        options.hotkey == before,
+                    "Reset preserves unrelated settings and the live shortcut");
+            SendMessageW(dialog, WM_COMMAND, check == SettingsCheck::ResetSave ? IDOK : IDCANCEL,
+                         0);
+        } else if (check == SettingsCheck::Conflict) {
+            require(registerShortcut(MAKEWORD(VK_F22, HOTKEYF_CONTROL | HOTKEYF_ALT), 98),
+                    "reserve a competing shortcut");
+            typeShortcut(dialog, VK_F22, HOTKEYF_CONTROL | HOTKEYF_ALT);
+            SendMessageW(dialog, WM_COMMAND, IDOK, 0);
+            require(IsWindowVisible(dialog) && options.hotkey == before && hotkeyRegistered,
+                    "conflict leaves settings open and preserves the working shortcut");
+            wchar_t status[128]{};
+            GetDlgItemTextW(dialog, IDC_STATUS, status, static_cast<int>(std::size(status)));
+            require(std::wstring(status).find(L"in use") != std::wstring::npos,
+                    "conflict explains the problem inline");
+            UnregisterHotKey(messageWindow, 98);
+            SendMessageW(dialog, WM_COMMAND, IDCANCEL, 0);
+        } else if (check == SettingsCheck::Escape) {
+            typeShortcut(dialog, VK_ESCAPE, 0);
+            require(!shortcutDraft.recording && shortcutDraft.value == before && hotkeyRegistered &&
+                        IsWindowVisible(dialog),
+                    "Escape cancels recording without closing settings");
+            SendMessageW(dialog, WM_COMMAND, IDCANCEL, 0);
+        } else if (check == SettingsCheck::FocusLoss) {
+            typeShortcut(dialog, VK_F23, HOTKEYF_CONTROL | HOTKEYF_SHIFT, false);
+            SetFocus(GetDlgItem(dialog, IDCANCEL));
+            require(!shortcutDraft.recording && shortcutDraft.value == before && hotkeyRegistered,
+                    "leaving an unfinished recording restores the previous shortcut");
+            SendMessageW(dialog, WM_COMMAND, IDCANCEL, 0);
+        } else {
+            typeShortcut(dialog, 'X', 0);
+            require(shortcutDraft.recording && shortcutDraft.value == before,
+                    "typing without a modifier does not overwrite the shortcut");
+            finishRecording(dialog, false);
+            typeShortcut(dialog, LOBYTE(before), HIBYTE(before));
+            require(!shortcutDraft.recording && shortcutDraft.value == before && hotkeyRegistered,
+                    "the already-registered shortcut can be recorded again");
+            typeShortcut(dialog, VK_F23, HOTKEYF_CONTROL | HOTKEYF_SHIFT);
+            require(shortcutDraft.value == MAKEWORD(VK_F23, HOTKEYF_CONTROL | HOTKEYF_SHIFT) &&
+                        !shortcutDraft.recording && hotkeyRegistered,
+                    "key release commits the draft and restores the live shortcut");
+            SendMessageW(dialog, WM_COMMAND, check == SettingsCheck::Save ? IDOK : IDCANCEL, 0);
+        }
+    } catch (const std::exception &error) {
+        settingsFailure = error.what();
+        EndDialog(dialog, IDCANCEL);
+    }
+    return TRUE;
+}
+
+void runSettingsChecks() {
+    const auto sandboxPath = L"Software\\RyCenter.Tests." + std::to_wstring(GetCurrentProcessId());
+    HKEY sandbox;
+    require(RegCreateKeyExW(HKEY_CURRENT_USER, sandboxPath.c_str(), 0, nullptr, 0, KEY_ALL_ACCESS,
+                            nullptr, &sandbox, nullptr) == ERROR_SUCCESS,
+            "create isolated test settings");
+    require(RegOverridePredefKey(HKEY_CURRENT_USER, sandbox) == ERROR_SUCCESS,
+            "redirect preferences and startup writes away from real user settings");
+    try {
+        options = {};
+        hotkeyRegistered = registerShortcut(options.hotkey, hotkeyId);
+        require(hotkeyRegistered && saveOptions(options), "start with the default shortcut");
+        const auto run = [](SettingsCheck check) {
+            settingsFailure.clear();
+            const auto result =
+                DialogBoxParamW(instance, MAKEINTRESOURCEW(IDD_SETTINGS), messageWindow,
+                                settingsTestProc, static_cast<LPARAM>(check));
+            require(result != -1, "open the real settings dialog");
+            if (!settingsFailure.empty())
+                throw std::runtime_error(settingsFailure);
+            require(loadOptions(), "reload persisted settings after dialog closes");
+        };
+        run(SettingsCheck::Cancel);
+        require(options.hotkey == rycenter::defaultShortcut, "Cancel does not persist a draft");
+        run(SettingsCheck::Save);
+        const auto custom = MAKEWORD(VK_F23, HOTKEYF_CONTROL | HOTKEYF_SHIFT);
+        require(options.hotkey == custom && hotkeyRegistered,
+                "Save persists and registers the new shortcut");
+        require(!registerShortcut(custom, 97), "the new shortcut is owned by RyCenter");
+        require(registerShortcut(rycenter::defaultShortcut, 97),
+                "Save releases the previous shortcut");
+        UnregisterHotKey(messageWindow, 97);
+        run(SettingsCheck::Conflict);
+        run(SettingsCheck::Escape);
+        run(SettingsCheck::FocusLoss);
+        run(SettingsCheck::ResetCancel);
+        require(options.hotkey == custom, "Cancel after Reset keeps the saved custom shortcut");
+        run(SettingsCheck::ResetSave);
+        require(options.hotkey == rycenter::defaultShortcut && hotkeyRegistered,
+                "Reset then Save persists and registers Ctrl+Alt+C");
+        UnregisterHotKey(messageWindow, hotkeyId);
+        hotkeyRegistered = false;
+    } catch (...) {
+        RegOverridePredefKey(HKEY_CURRENT_USER, nullptr);
+        RegCloseKey(sandbox);
+        RegDeleteTreeW(HKEY_CURRENT_USER, sandboxPath.c_str());
+        throw;
+    }
+    RegOverridePredefKey(HKEY_CURRENT_USER, nullptr);
+    RegCloseKey(sandbox);
+    RegDeleteTreeW(HKEY_CURRENT_USER, sandboxPath.c_str());
+}
 }
 
 int main(int argc, char **) {
@@ -261,6 +409,7 @@ int main(int argc, char **) {
         require(messageWindow != nullptr, "create hidden event receiver");
         fixture.start();
         runChecks(fixture);
+        runSettingsChecks();
     } catch (const std::exception &error) {
         std::fprintf(stderr, "FAIL: %s\n", error.what());
         result = 1;

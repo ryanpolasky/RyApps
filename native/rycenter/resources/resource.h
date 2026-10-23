@@ -3,3 +3,5 @@
 #define IDC_HOTKEY 1001
 #define IDC_AUTO 1002
 #define IDC_STARTUP 1003
+#define IDC_RESET 1004
+#define IDC_STATUS 1005
