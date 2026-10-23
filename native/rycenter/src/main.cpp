@@ -1,7 +1,7 @@
+#include <windows.h>
 #include <commctrl.h>
 #include <dwmapi.h>
 #include <shellapi.h>
-#include <windows.h>
 #include <windowsx.h>
 
 #include <algorithm>
