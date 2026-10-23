@@ -1,10 +1,8 @@
 # RyApps
 
-The site for my Windows apps, [RyHome](https://github.com/ryanpolasky/RyHome), [RyMessage](https://github.com/ryanpolasky/RyMessage), and [RyCenter](native/rycenter) (preview). Live at [apps.ryanpolasky.com](https://apps.ryanpolasky.com).
+The site for my Windows apps, [RyHome](https://github.com/ryanpolasky/RyHome), [RyMessage](https://github.com/ryanpolasky/RyMessage), and [RyCenter](https://github.com/ryanpolasky/RyCenter). Live at [apps.ryanpolasky.com](https://apps.ryanpolasky.com).
 
 It's a single static page built with Vite and served as a Cloudflare Worker with static assets.
-
-RyCenter's standalone C++/Win32 source, MIT license, build instructions, and tests live in [`native/rycenter`](native/rycenter). It has no dependency on the site or Node.js. Its GitHub Actions workflow builds a portable Windows x64 preview; the site links to that workflow rather than advertising an unpublished release. The RyCenter graphic is explicitly an illustration, not a screenshot.
 
 ## Development
 
